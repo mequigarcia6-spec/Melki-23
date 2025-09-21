@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorpresa de Amor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(to bottom, #1a0000, #330000, #1a0000);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container { max-width: 1000px; width: 100%; z-index: 20; position: relative; display: flex; flex-direction: column; align-items: center; }
+        h1 { font-size: 3rem; margin-bottom: 10px; color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        .box-container { position: relative; width: 300px; height: 300px; margin: 40px auto; perspective: 1000px; cursor: pointer; }
+        .box { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 1.5s ease-in-out; }
+        .box.open { transform: rotateX(110deg); }
+        .box-lid, .box-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #d4af37, #ffd700, #fff8e1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+        .box-lid { transform-origin: top; transform: rotateX(0deg); transition: transform 1.5s ease-in-out; border: 5px solid rgba(0, 0, 0, 0.1); border-bottom: none; }
+        .box-base { background: linear-gradient(45deg, #b8860b, #d4af37); border: 5px solid rgba(0, 0, 0, 0.1); border-top: none; }
+        .box.open .box-lid { transform: rotateX(-110deg); }
+        .heart-lock { font-size: 60px; color: #ff4d94; text-shadow: 0 0 15px rgba(255, 77, 148, 0.7); animation: heartbeat 1.5s infinite; }
+        .instructions { margin: 20px 0; font-size: 1.2rem; color: #ffb6c1; animation: pulse 2s infinite; }
+        .surprise-content { display: none; width: 100%; flex-direction: column; align-items: center; animation: fadeIn 2s forwards; }
+        .box.open ~ .surprise-content { display: flex; }
+        .image-container { width: 280px; height: 280px; border-radius: 50%; overflow: hidden; border: 5px solid #ffd700; box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); margin: 30px auto; position: relative; }
+        .profile-image { width: 100%; height: 100%; object-fit: cover; }
+        .image-frame { position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border: 2px solid #ff69b4; border-radius: 50%; pointer-events: none; animation: rotateFrame 20s linear infinite; }
+        .messages { background: rgba(0, 0, 0, 0.7); border-radius: 20px; padding: 30px; margin: 30px 0; backdrop-filter: blur(10px); border: 1px solid rgba(255, 215, 0, 0.3); box-shadow: 0 0 25px rgba(255, 215, 0, 0.2); max-width: 800px; }
+        .message { font-size: 1.3rem; line-height: 1.6; margin: 20px 0; padding: 15px; border-radius: 15px; background: rgba(255, 255, 255, 0.1); transition: all 0.3s; cursor: pointer; }
+        .message:hover { transform: scale(1.02); background: rgba(255, 255, 255, 0.15); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+        .poem { font-style: italic; text-align: center; margin: 25px 0; padding: 20px; background: rgba(255, 105, 180, 0.1); border-radius: 15px; border-left: 4px solid #ff69b4; }
+        .hearts { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; }
+        .heart { position: absolute; font-size: 20px; opacity: 0; z-index: 15; }
+        button { padding: 15px 40px; font-size: 1.2rem; background: linear-gradient(to bottom, #ffd700, #ffa000); color: #330000; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); font-weight: 600; margin: 10px; }
+        button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4); }
+        button:active { transform: translateY(1px); }
+        footer { margin-top: 40px; color: #ffb6c1; font-size: 1rem; }
+        .decoration { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .flower-decoration { position: absolute; font-size: 24px; color: #ff69b4; opacity: 0.3; z-index: 5; }
+        @keyframes heartbeat { 0%,100%{transform:scale(1);}50%{transform:scale(1.1);} }
+        @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:0.7;} }
+        @keyframes float { 0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(-100vh) rotate(360deg);opacity:0;} }
+        @keyframes fadeIn { 0%{opacity:0;transform:translateY(20px);}100%{opacity:1;transform:translateY(0);} }
+        @keyframes rotateFrame { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
+        @keyframes floatSlow { 0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-20px) rotate(10deg);} }
+        @media (max-width: 768px) {
+            .box-container { width: 250px; height: 250px; }
+            .image-container { width: 220px; height: 220px; }
+            .message { font-size: 1.1rem; }
+            h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Para Mi Amor</h1>
+        <p class="instructions">Toca la caja para abrirla y descubrir tu sorpresa</p>
+        
+        <div class="box-container" id="boxContainer">
+            <div class="box" id="box">
+                <div class="box-lid">
+                    <div class="heart-lock"><i class="fas fa-lock-open"></i></div>
+                </div>
+                <div class="box-base"></div>
+            </div>
+        </div>
+        
+        <div class="surprise-content" id="surpriseContent">
+            <div class="image-container">
+                <img src="https://i.ibb.co/SXMPZ5jz/love.jpg" alt="Nuestra foto" class="profile-image">
+                <div class="image-frame"></div>
+            </div>
+            
+            <div class="messages">
+                <div class="poem">
+                    "En el jardín de mi vida,<br>floreciste con luz propia.<br>Eres el sol que ilumina mis días,<br>la luna que alumbra mis noches.<br>Eres mi poema favorito,<br>mi canción de amor eterno."
+                </div>
+                <div class="message">Eres la mujer más maravillosa que he conocido en mi vida 💖</div>
+                <div class="message">Tu sonrisa ilumina mis días como el sol ilumina la tierra 🌞</div>
+                <div class="message">Cada momento a tu lado es un regalo que atesoro en mi corazón 🎁</div>
+                
+                <div class="poem">
+                    "Tus ojos son dos luceros,<br>que guían mi camino.<br>Tu voz es la melodía,<br>que calma mi destino.<br>Tu amor es el refugio,<br>donde siempre quiero estar."
+                </div>
+                
+                <div class="message">Eres mi sueño hecho realidad, mi razón para ser mejor cada día ✨</div>
+                <div class="message">Amo la persona que soy cuando estoy contigo 😍</div>
+                <div class="message">Eres la dueña de mis pensamientos y el amor de mi vida 💭</div>
+                
+                <div class="poem">
+                    "Como las flores al spring,<br>así mi corazón por ti.<br>Eres la primavera eterna,<br>que habita dentro de mí.<br>Cada latido te nombra,<br>cada suspiro te canta."
+                </div>
+                
+                <div class="message">Contigo aprendí que el amor verdadero existe 💑</div>
+                <div class="message">Eres mi mejor aventura y mi lugar favorito 🗺️</div>
+                <div class="message">Tu amor es la melodía que alegra mi corazón todos los días 🎶</div>
+                <div class="message">Eres tan hermosa por dentro como por fuera 💫</div>
+                <div class="message">Mi amor por ti crece más cada día 🌱</div>
+                <div class="message">Eres mi hoy, mi mañana y mi siempre 🌅</div>
+                <div class="message">Cada día a tu lado es una página en nuestro libro de amor 📖</div>
+                <div class="message">Eres la respuesta a todas mis plegarias 🙏</div>
+                <div class="message">Amo cada detalle de ti, incluso aquellos que crees imperfectos 🌸</div>
+            </div>
+            
+            <button id="heartsButton"><i class="fas fa-heart"></i> Lluvia de Corazones</button>
+            <button id="flowersButton"><i class="fas fa-seedling"></i> Flores Mágicas</button>
+        </div>
+        
+        <footer>
+            Hecho con <i class="fas fa-heart" style="color: #ff0000;"></i> para la mujer más especial
+        </footer>
+    </div>
+    
+    <div class="hearts" id="hearts"></div>
+    <div class="decoration" id="decoration"></div>
+    
+    <!-- Audio -->
+    <audio id="loveAudio" src="https://www.dropbox.com/scl/fi/sc1oj270gdl8cnuvvbgz9/La-Oreja-de-Van-Gogh-Rosas-V-deo-Oficial-MP3_160K.mp3?rlkey=mwvkd4rm8rok0eplbdc9u0blh&st=gccfr8go&dl=1" preload="auto"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const boxContainer = document.getElementById('boxContainer');
+            const box = document.getElementById('box');
+            const surpriseContent = document.getElementById('surpriseContent');
+            const heartsContainer = document.getElementById('hearts');
+            const decorationContainer = document.getElementById('decoration');
+            const heartsButton = document.getElementById('heartsButton');
+            const flowersButton = document.getElementById('flowersButton');
+            const messages = document.querySelectorAll('.message');
+            const loveAudio = document.getElementById('loveAudio');
+            let boxOpened = false;
+
+            // Intentar reproducir automáticamente al cargar la página
+            loveAudio.play().catch(() => {
+                console.log('Navegador bloqueó reproducción automática. Toca la pantalla para activar el audio.');
+            });
+
+            // Abrir la caja al hacer clic
+            boxContainer.addEventListener('click', function() {
+                if (!boxOpened) {
+                    box.classList.add('open');
+                    boxOpened = true;
+                    surpriseContent.style.display = 'flex';
+                    
+                    // Reproducir audio al abrir la caja
+                    loveAudio.play().catch(() => console.log('Audio requiere interacción del usuario.'));
+
+                    // Iniciar corazones y flores
+                    createHearts(50);
+                    createFlowers(20);
+                    
+                    // Sonido breve de apertura
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.5);
+                        const gainNode = audioContext.createGain();
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        oscillator.start();
+                        oscillator.stop(audioContext.currentTime + 1);
+                    } catch (e) { console.log('Audio no compatible'); }
+                }
+            });
+
+            // Crear corazones flotantes
+            function createHearts(count) {
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.className = 'heart';
+                        heart.innerHTML = '<i class="fas fa-heart"></i>';
+                        const xPos = Math.random() * 100;
+                        heart.style.left = `${xPos}%`;
+                        heart.style.bottom = `0%`;
+                        const size = 15 + Math.random() * 25;
+                        heart.style.fontSize = `${size}px`;
+                        const colors = ['#ffd700','#ff69b4','#dda0dd','#ff6b6b','#ff4d94','#ff1493'];
+                        heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+                        const duration = 3 + Math.random() * 3;
+                        const xMovement = (Math.random() - 0.5) * 100;
+                        heart.style.animation = `float ${duration}s forwards`;
+                        heart.style.transform = `translateX(${xMovement}px)`;
+                        heartsContainer.appendChild(heart);
+                        setTimeout(()=>heart.remove(), duration*1000);
+                    }, i*50);
+                }
+            }
+
+            // Crear flores decorativas
+            function createFlowers(count) {
+                for (let i = 0; i < count; i++) {
+                    const flower = document.createElement('div');
+                    flower.className = 'flower-decoration';
+                    flower.innerHTML = '<i class="fas fa-heart"></i>';
+                    flower.style.left = `${Math.random()*100}%`;
+                    flower.style.top = `${Math.random()*100}%`;
+                    const size = 20 + Math.random()*30;
+                    flower.style.fontSize = `${size}px`;
+                    const colors = ['#ff69b4','#ffd700','#dda0dd','#98fb98','#87ceeb'];
+                    flower.style.color = colors[Math.floor(Math.random()*colors.length)];
+                    const duration = 15 + Math.random()*15;
+                    flower.style.animation = `floatSlow ${duration}s infinite ease-in-out`;
+                    decorationContainer.appendChild(flower);
+                }
+            }
+
+            // Botones
+            heartsButton.addEventListener('click', ()=>createHearts(30));
+            flowersButton.addEventListener('click', ()=>createFlowers(10));
+
+            // Mensajes interactivos
+            messages.forEach(message=>{
+                message.addEventListener('click', function(){
+                    this.style.transform='scale(1.05)';
+                    this.style.background='rgba(255,215,0,0.2)';
+                    this.style.color='#ffd700';
+                    createHearts(5);
+                    setTimeout(()=>{
+                        this.style.transform='';
+                        this.style.background='';
+                        this.style.color='';
+                    },1000);
+                });
+            });
+
+            // Corazones iniciales sutiles
+            setInterval(()=>{ if(boxOpened){ createHearts(3); } },2000);
+        });
+    </script>
+</body>
+</html>
